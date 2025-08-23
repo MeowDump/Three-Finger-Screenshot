@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Three-Finger Screenshot</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'Mona';
+      src: url('mona.ttf') format('truetype');
+    }
+
+    :root {
+      --dark-bg: #000;
+      --light-bg: #ffeef3;
+      --dark-accent: #0f88ff;
+      --light-accent: #ff6b9a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Mona', sans-serif;
+    }
+
+    body {
+      background-color: var(--dark-bg);
+      color: white;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .light {
+      background-color: var(--light-bg);
+      color: black;
+    }
+
+    #particles-js {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .main-box {
+      padding: 2rem 1.5rem;
+      width: 100%;
+      max-width: 600px;
+      border-radius: 20px;
+    }
+
+    .title {
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+      color: var(--dark-accent);
+      margin-bottom: 0.25rem;
+    }
+
+    .light .title {
+      color: var(--light-accent);
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      opacity: 0.7;
+    }
+
+    .button {
+      background: var(--dark-accent);
+      border: none;
+      padding: 0.9rem 1.2rem;
+      font-size: 1rem;
+      border-radius: 12px;
+      cursor: pointer;
+      color: white;
+      margin-bottom: 1rem;
+      width: 100%;
+      transition: background 0.3s ease;
+    }
+
+    .light .button {
+      background: var(--light-accent);
+    }
+
+    .terminal {
+      background: transparent;
+      font-family: monospace;
+      font-size: 0.9rem;
+      margin-top: 1.5rem;
+    }
+
+    .log-line {
+      margin-bottom: 1rem;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      white-space: pre-wrap;
+      line-height: 1.4;
+    }
+
+    .light .log-line {
+      background: rgba(0,0,0,0.05);
+    }
+
+    .log-info {
+      color: #00C853;
+      font-weight: 600;
+    }
+
+    .log-success {
+      color: #1E90FF;
+      font-weight: 600;
+    }
+
+    .log-error {
+      color: #FF0000;
+      font-weight: 600;
+    }
+
+    .theme-toggle {
+      margin-top: 2rem;
+      font-size: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .theme-toggle i {
+      transition: transform 0.3s ease;
+    }
+
+    .theme-toggle:hover i {
+      transform: scale(1.2);
+    }
+
+    @media screen and (max-width: 480px) {
+      .main-box {
+        padding: 1.5rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="particles-js"></div>
+  <div class="container">
+    <div class="main-box">
+      <div class="title">Three-Finger Screenshot</div>
+      <div class="subtitle">Toggle gesture and view recent logs</div>
+      <button class="button" onclick="toggleGesture()">Toggle Gesture</button>
+      <button class="button" onclick="loadLog()">View Log</button>
+      <div class="terminal" id="terminal">No logs yet...</div>
+      <div class="theme-toggle" onclick="toggleTheme()">
+        <i class="fas fa-moon"></i>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script>
+    particlesJS('particles-js', {
+      particles: {
+        number: { value: 80 },
+        color: { value: "#0000FF" },
+        shape: { type: "circle" },
+        opacity: { value: 0.3 },
+        size: { value: 2 },
+        line_linked: {
+          enable: true,
+          distance: 120,
+          color: "#0000FF",
+          opacity: 0.2,
+          width: 1
+        },
+        move: {
+          enable: true,
+          speed: 1.5,
+          direction: "none",
+          out_mode: "out"
+        }
+      },
+      interactivity: {
+        events: {
+          onhover: { enable: true, mode: "repulse" },
+          onclick: { enable: true, mode: "push" }
+        },
+        modes: {
+          repulse: { distance: 100 },
+          push: { particles_nb: 4 }
+        }
+      },
+      retina_detect: true
+    });
+
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+      const icon = document.querySelector('.theme-toggle i');
+      icon.classList.toggle('fa-moon');
+      icon.classList.toggle('fa-sun');
+
+      const newColor = document.body.classList.contains('light') ? '#ffb6c1' : '#ffffff';
+      if (window.pJSDom && window.pJSDom[0]) {
+        const pJS = window.pJSDom[0].pJS;
+        pJS.particles.line_linked.color = newColor;
+        pJS.particles.color.value = newColor;
+        pJS.fn.particlesRefresh();
+      }
+    }
+
+    function runShell(cmd, cb) {
+      if (!window.ksu || typeof ksu.exec !== "function") return alert("KernelSU not available");
+      const id = "cb_" + Date.now();
+      window[id] = (code, stdout, stderr) => {
+        delete window[id];
+        cb?.(code, stdout, stderr);
+      };
+      ksu.exec(cmd, '{}', id);
+    }
+
+    function toggleGesture() {
+      document.getElementById("terminal").innerHTML = "Toggling gesture...";
+      runShell("sh /data/adb/modules/Three-Finger-Screenshot/action.sh", () => {
+        setTimeout(loadLog, 500);
+      });
+    }
+
+    function loadLog() {
+      runShell("cat /data/adb/Three-Finger-Screenshot/log.txt", (code, out) => {
+        const terminal = document.getElementById("terminal");
+        if (code !== 0 || !out.trim()) {
+          terminal.innerHTML = "No logs found.";
+          return;
+        }
+
+        terminal.innerHTML = "";
+        const lines = out.trim().split("\n");
+        lines.forEach(line => {
+          const div = document.createElement("div");
+          div.className = "log-line";
+
+          if (line.includes("Screenshot saved")) {
+            div.classList.add("log-success");
+          } else if (line.toLowerCase().includes("disabled")) {
+            div.classList.add("log-error");
+          } else if (line.toLowerCase().includes("enabled")) {
+            div.classList.add("log-info");
+          }
+
+          div.textContent = line;
+          terminal.appendChild(div);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
